@@ -13,6 +13,7 @@
        
        var timeline = [];
 
+    // Instructions
        var instructions = {
            type: 'instructions',
            pages: ['Welcome','Press f when nonword and press j when word'],
@@ -20,8 +21,7 @@
        };
        timeline.push(instructions);
 
-
-
+    // SRDT procedure
        var fixation = {
            type: 'html-keyboard-response',
            stimulus: '<span style=\"font-size:60px\;">+<\span>',
@@ -118,7 +118,8 @@
             }
        }
        timeline.push(srdt_procedure)
-
+    
+    // Initialization
        jsPsych.init({
            timeline: timeline,
            on_finish: function() {
