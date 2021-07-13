@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+   <head>
+       <title>SRDT</title>
+       <script src="jspsych-6.3.0/jspsych.js"></script>
+       <script src="jspsych-6.3.0/plugins/jspsych-html-keyboard-response.js"></script>
+       <script src="jspsych-6.3.0/plugins/jspsych-instructions.js"></script>
+       <script src="stimuli_develop.js"></script>
+       <link href="jspsych-6.3.0/css/jspsych.css" rel ="stylesheet">
+   </head>
+   <body></body>
+   <script>
+       
+       var timeline = [];
+
+       var instructions = {
+           type: 'instructions',
+           pages: ['Welcome','Press f when nonword and press j when word'],
+           show_clickable_nav: true
+       };
+       timeline.push(instructions);
+
+
+
+       var fixation = {
+           type: 'html-keyboard-response',
+           stimulus: '<span style=\"font-size:60px\;">+<\span>',
+           choices: jsPsych.NO_KEYS,
+           trial_duration: function(){
+                return jsPsych.randomization.sampleWithoutReplacement([250, 500, 750, 1000, 1250, 1500, 1750, 2000], 1)[0];
+            },
+       }
+
+       var target = {
+           type: 'html-keyboard-response',
+           stimulus: function() {
+                return `<p style="font-size: 60px;">${jsPsych.timelineVariable('target').toUpperCase()}</p>`},
+           choices: jsPsych.NO_KEYS,
+           trial_duration: 120
+       }
+
+       var probe = {
+           type: 'html-keyboard-response',
+           stimulus: function() {
+                return `<p style="font-size: 60px;">${jsPsych.timelineVariable('probe').toUpperCase()}</p>`},
+           choices: jsPsych.NO_KEYS,
+           trial_duration: 120
+       }
+
+       var test = {
+           type: 'html-keyboard-response',
+           stimulus: ' ',
+           choices: ['f','j'],
+           trial_duration: 7000,
+           post_trial_gap: 1000,
+           data: {
+                trial_part: 'test',
+                probe: jsPsych.timelineVariable('probe'),
+                target: jsPsych.timelineVariable('target')},
+           on_finish: function(){
+               trial_counter++
+               console.log(trial_counter)
+               console.log(jsPsych.data.get().last(1).values()[0].rt);
+           }
+       }
+       var trial_counter = 0;
+
+       var undecisive ={
+            type: 'html-keyboard-response',
+           stimulus: 'no response given. Please press "space" to continue',
+           choices: [' '],
+       };
+
+       var if_undecisive = {
+            timeline: [undecisive],
+            conditional_function: function(){
+                var rt_latesttrial = jsPsych.data.get().last(1).values()[0].rt
+                if(rt_latesttrial == null){
+                    return true;} 
+                else {
+                    return false;}
+                }
+       };
+
+       var pause = {
+           type: 'html-keyboard-response',
+           data:{trial_part: 'pause'},
+           stimulus: 'Please take a pause',
+           choices: jsPsych.NO_KEYS,
+           trial_duration: 2000,
+           response_ends_trial: false
+       }
+
+       var ready = {
+           type: 'html-keyboard-response',
+           data:{trial_part: 'ready'},
+           stimulus: 'Are you ready? Please press "space" to continue.',
+           choices: [' ']}
+
+       if_pause = {
+           timeline: [pause,ready],
+           conditional_function: function(){
+                if(trial_counter % 2 == 1){
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+       }
+       
+       var srdt_procedure = {
+           timeline: [if_pause,fixation, target, probe, test, if_undecisive],
+           timeline_variables: test_stimuli,
+           randomize_order: true,
+           sample: {
+                type: 'without-replacement',
+                size: 2,
+            }
+       }
+       timeline.push(srdt_procedure)
+
+       jsPsych.init({
+           timeline: timeline,
+           on_finish: function() {
+               jsPsych.data.displayData();
+            }
+        })
+
+   </script>
+</html>
