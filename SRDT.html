@@ -18,6 +18,8 @@
        var word_assign = {target: assign_w[0], probe: assign_w[1]};
        var assign_r = shuffle(['f','j']);
        var response_assign = {related: assign_r[0], unrelated: assign_r[1]};
+       var trial_counter = 1;
+       var practice_counter = 1;
 
 
     // Instructions
@@ -27,8 +29,9 @@
            show_clickable_nav: true
        };
 
+
     // SRDT procedure
-       
+
        // shuffle function from https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
        function shuffle(array) {
             var currentIndex = array.length,  randomIndex;
@@ -91,8 +94,7 @@
                console.log(response_assign.related)
            }
        }
-       var trial_counter = 1;
-       var practice_counter = 1;
+       
 
        var undecisive ={
             type: 'html-keyboard-response',
@@ -118,13 +120,13 @@
            choices: jsPsych.NO_KEYS,
            trial_duration: 2000,
            response_ends_trial: false
-       }
+       };
 
        var ready = {
            type: 'html-keyboard-response',
            data:{trial_part: 'ready'},
            stimulus: 'Are you ready? Please press "space" to continue.',
-           choices: [' ']}
+           choices: [' ']};
 
        if_pause = {
            timeline: [pause,ready],
@@ -135,7 +137,7 @@
                     return false;
                 }
             }
-       }
+       };
        
        var srdt_procedure = {
            timeline: [if_pause,fixation, target, probe, test, if_undecisive],
@@ -145,9 +147,9 @@
                 type: 'without-replacement',
                 size: 4,
             }
-       }
+       };
        
-
+    // Practice procedure
        var practice = {
            type: 'html-keyboard-response',
            stimulus: ' ',
@@ -174,7 +176,7 @@
                practice_counter++
                console.log(response_assign.related)
            }
-       }
+       };
 
        var feedback = {
             type: 'html-keyboard-response',
@@ -206,14 +208,15 @@
                 type: 'without-replacement',
                 size: 2,
             }
-       }
+       };
+
     // Generate timeline
        var timeline = [];
 
        timeline.push(instructions);
-       timeline.push(srdt_practice_procedure)
+       timeline.push(srdt_practice_procedure);
        
-       timeline.push(srdt_procedure)
+       timeline.push(srdt_procedure);
     
     // Initialization
        jsPsych.init({
