@@ -11,12 +11,18 @@
    <body></body>
    <script>
        
+    // General settings
        var timeline = [];
+       var assign_w = shuffle(['1','2']);
+       var word_assign = {target: assign_w[0], probe: assign_w[1]};
+       var assign_r = shuffle(['f','j']);
+       var response_assign = {related: assign_r[0], unrelated: assign_r[1]};
+
 
     // Instructions
        var instructions = {
            type: 'instructions',
-           pages: ['Welcome','Press f when nonword and press j when word'],
+           pages: ['Welcome','Please press <strong> '+ response_assign.related.toString() + ' when related </strong> and <strong> ' + response_assign.unrelated.toString() + ' when unrelated </strong>. '],
            show_clickable_nav: true
        };
        timeline.push(instructions);
@@ -33,10 +39,6 @@
                 array[randomIndex], array[currentIndex]];}
             return array;};
         
-        var assign = shuffle(['1','2']);
-        var word_assign = {target: assign[0], probe: assign[1]};
-     
-
        var fixation = {
            type: 'html-keyboard-response',
            stimulus: '<span style=\"font-size:60px\;">+<\span>',
@@ -69,15 +71,27 @@
            trial_duration: 7000,
            post_trial_gap: 1000,
            data: {
+                trial_id: function() {return trial_counter;},
                 trial_part: 'test',
-                probe: jsPsych.timelineVariable('probe'),
-                target: jsPsych.timelineVariable('target')},
+                probe: jsPsych.timelineVariable('word'.concat(word_assign.probe)),
+                target: jsPsych.timelineVariable('word'.concat(word_assign.target)),
+                MEN_score: jsPsych.timelineVariable('score'),
+                w2v_cosine: jsPsych.timelineVariable('cosine'),
+                relatedness_level: jsPsych.timelineVariable('relatedness'),
+                frequency_probe: jsPsych.timelineVariable('frequency'.concat(word_assign.probe)),
+                frequency_target: jsPsych.timelineVariable('target'.concat(word_assign.probe)),
+                concreteness_probe: jsPsych.timelineVariable('concreteness'.concat(word_assign.probe)),
+                concreteness_target: jsPsych.timelineVariable('concreteness'.concat(word_assign.target)),
+                length_probe: jsPsych.timelineVariable('length'.concat(word_assign.probe)),
+                length_target: jsPsych.timelineVariable('length'.concat(word_assign.target)),
+                key_related: response_assign.related
+            },
            on_finish: function(){
                trial_counter++
-               console.log('word'.concat(word_assign.probe))
+               console.log(response_assign.related)
            }
        }
-       var trial_counter = 0;
+       var trial_counter = 1;
 
        var undecisive ={
             type: 'html-keyboard-response',
@@ -114,7 +128,7 @@
        if_pause = {
            timeline: [pause,ready],
            conditional_function: function(){
-                if(trial_counter % 2 == 0 && trial_counter !=0){
+                if(trial_counter % 3 == 0 && trial_counter !=0){
                     return true;
                 } else {
                     return false;
