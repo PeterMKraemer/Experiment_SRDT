@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+   <head>
+       <title>Experiment 0</title>
+       <script src="jspsych-6.3.0/jspsych.js"></script>
+       <script src="jspsych-6.3.0/plugins/jspsych-html-keyboard-response.js"></script>
+       <script src="jspsych-6.3.0/plugins/jspsych-instructions.js"></script>
+       <script src="jspsych-6.3.0/plugins/jspsych-survey-select.js"></script>
+       <script src="jspsych-6.3.0/plugins/jspsych-survey-text.js"></script>
+       <script src="stimuli_develop.js"></script>
+       <script src="practice_stimuli.js"></script>
+       <link href="jspsych-6.3.0/css/jspsych.css" rel ="stylesheet">
+   </head>
+   <body></body>
+   <script>
+       
+    // General settings
+       
+       var assign_w = shuffle(['1','2']);
+       var word_assign = {target: assign_w[0], probe: assign_w[1]};
+       var assign_r = shuffle(['f','j']);
+       var response_assign = {related: assign_r[0], unrelated: assign_r[1]};
+       var trial_counter = 1;
+       var practice_counter = 1;
+
+
+    // Prolific ID
+        var prolificID = {
+            type: 'survey-text',
+            questions: [{prompt: "Welcome to the experiment! Please enter your Prolific ID to continue:", rows: 1, columns: 40, value: ""},
+                            ]
+        };
+
+    // Consent
+    var consent = {
+      type: "html-keyboard-response",
+      stimulus: "<p align='left'>Thank you for your interest in this study,</p>"+
+                "<p align='left'>The aim of this study is to investigate how people make judgments about the meaning of words. You will see word pairs and judge whether they have a related meaning or not. The whole study will take about 30 minutes to complete."+ 
+                  " The research is conducted by researchers of the University of Basel, Switzerland. The purpose is to advance basic research about how people understand language.</p>"+
+                "<p align='left'><strong>Compensation</strong></p>"+
+                "<p align='left'>After finishing the experiment, you will be compensated with a flat fee of 3.75 pounds for your participation.</p>"+
+                "<p align='left'><strong>Risks and benefits of participation</strong></p>"+
+                "<p align='left'>Your participation is not associated with any risk to your health or financial cost. Your compensation will be credited to your account as soon as possible and latest within 24 hours of completing the study.</p>"+
+                "<p align='left'><strong>Data management</strong></p>"+
+                "<p align='left'>This study is fully anonymized. Your responses will be recorded and analyzed using a randomly-generated, study-specific identifier. We only collect data within this experiment. The results of this study will be disseminated at conferences and academic journals in aggregated fashion without reference to individual"+
+                    "participants. In order to facilitate future research, your anonymized responses will also be made publicly available via established online databases, such as the Open Science Framework. However, prior to publishing the data, any information that could theoretically serve for"+
+                    "identification will be removed from the data. Identification of your person on the basis of your responses will thus be impossible.</p>"+    
+                "<p align='left'><strong>Aborting the study</strong></p>"+   
+                "<p align='left'>Participation in this study is voluntarily. At every point during the study, you will be able to abort the study without providing reasons. When you abort the study, any recorded data is discarded and, in line with common practice at Prolific, you will not receive compensation"+
+                    "for participation in the study. After competition of the study, you will no longer be able to withdraw permission to use your data, as due to the employed anonymization protocol we will no longer be able to link your data to your person. </p> "+
+                "<p align='left'><strong>Contact person</strong></p>"+   
+                "<p align='left'>If you have questions or complaints about the proceedings of this study, please contact the responsible researcher MSc Peter Kraemer (peter DOT kraemer AT unibas DOT ch).</p>"+ 
+                "<p align='left'><strong>Consent</strong></p>"+   
+                "<p align='left'>By pressing <strong>Y</strong>, you provide consent to the above conditions. You confirm to have had sufficient amount of time reach this decision. If you do not want to participate in the study, please close this tab.</p>",
+	choices: ['Y'],
+    };
+    
+    // Instructions
+       var instructions = {
+           type: 'instructions',
+           pages: ['Welcome','Please press <strong> '+ response_assign.related.toString() + ' when related </strong> and <strong> ' + response_assign.unrelated.toString() + ' when unrelated </strong>. '],
+           show_clickable_nav: true
+       };
+
+    // Demographics
+    var age = [];
+              age.push('Prefer not to answer')
+              for (var i = 18; i <= 99; i++) {
+                age.push(i);
+              }
+    var demographics = {
+        type: 'survey-select',
+        preamble: 'Please complete your personal details below',
+        questions: [
+            {
+                prompt: 'What is your age?',
+                name: 'age',
+                placeholder: '--select--',
+                options: age,
+                randomize_option_order: false,
+                required: true
+            },
+        {
+                prompt: 'What is your gender?',
+                options: ['Male','Female','Diverse','Prefer not to answer'],
+                placeholder: '--select--',
+                name: 'gender', 
+                required: true
+            },
+            {
+                prompt: 'What is your mother tongue?',
+                options: ['English','Other','Prefer not to answer'],
+                placeholder: '--select--',
+                name: 'English', 
+                required: true
+            },
+        {
+                prompt: 'What is your dominant hand?',
+                options: ['Right-handed','Left-handed','Both-handed','Prefer not to answer'],
+                placeholder: '--select--',
+                name: 'handedness', 
+                required: true
+            },
+        ],
+        required_message: 'Please respond to all questions',
+        data:{
+            trial_part: 'demographics'
+        }
+    };
+    
+
+    // SRDT procedure
+
+       // shuffle function from https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+       function shuffle(array) {
+            var currentIndex = array.length,  randomIndex;
+            while (0 !== currentIndex) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [
+                array[randomIndex], array[currentIndex]];}
+            return array;};
+        
+       var fixation = {
+           type: 'html-keyboard-response',
+           stimulus: '<span style=\"font-size:60px\;">+<\span>',
+           choices: jsPsych.NO_KEYS,
+           trial_duration: function(){
+                return jsPsych.randomization.sampleWithoutReplacement([250, 500, 750, 1000, 1250, 1500, 1750, 2000], 1)[0];
+            },
+       }
+
+       var target = {
+           type: 'html-keyboard-response',
+           stimulus: function() {
+                return `<p style="font-size: 60px;">${jsPsych.timelineVariable('word'.concat(word_assign.target)).toUpperCase()}</p>`},
+           choices: jsPsych.NO_KEYS,
+           trial_duration: 120
+       }
+
+       var probe = {
+           type: 'html-keyboard-response',
+           stimulus: function() {
+                return `<p style="font-size: 60px;">${jsPsych.timelineVariable('word'.concat(word_assign.probe)).toUpperCase()}</p>`},
+           choices: jsPsych.NO_KEYS,
+           trial_duration: 120
+       }
+
+       var test = {
+           type: 'html-keyboard-response',
+           stimulus: ' ',
+           choices: ['f','j'],
+           trial_duration: 7000,
+           post_trial_gap: 1000,
+           data: {
+                trial_id: function() {return trial_counter;},
+                trial_part: 'test',
+                probe: jsPsych.timelineVariable('word'.concat(word_assign.probe)),
+                target: jsPsych.timelineVariable('word'.concat(word_assign.target)),
+                MEN_score: jsPsych.timelineVariable('score'),
+                w2v_cosine: jsPsych.timelineVariable('cosine'),
+                relatedness_level: jsPsych.timelineVariable('relatedness'),
+                frequency_probe: jsPsych.timelineVariable('frequency'.concat(word_assign.probe)),
+                frequency_target: jsPsych.timelineVariable('target'.concat(word_assign.probe)),
+                concreteness_probe: jsPsych.timelineVariable('concreteness'.concat(word_assign.probe)),
+                concreteness_target: jsPsych.timelineVariable('concreteness'.concat(word_assign.target)),
+                length_probe: jsPsych.timelineVariable('length'.concat(word_assign.probe)),
+                length_target: jsPsych.timelineVariable('length'.concat(word_assign.target)),
+                key_related: response_assign.related
+            },
+           on_finish: function(){
+               trial_counter++
+               console.log(response_assign.related)
+           }
+       }
+       
+
+       var undecisive ={
+            type: 'html-keyboard-response',
+           stimulus: 'no response given. Please press "space" to continue',
+           choices: [' '],
+       };
+
+       var if_undecisive = {
+            timeline: [undecisive],
+            conditional_function: function(){
+                var rt_latesttrial = jsPsych.data.get().last(1).values()[0].rt
+                if(rt_latesttrial == null){
+                    return true;} 
+                else {
+                    return false;}
+                }
+       };
+
+       var pause = {
+           type: 'html-keyboard-response',
+           data:{trial_part: 'pause'},
+           stimulus: 'Please take a pause',
+           choices: jsPsych.NO_KEYS,
+           trial_duration: 2000,
+           response_ends_trial: false
+       };
+
+       var ready = {
+           type: 'html-keyboard-response',
+           data:{trial_part: 'ready'},
+           stimulus: 'Are you ready? Please press "space" to continue.',
+           choices: [' ']};
+
+       if_pause = {
+           timeline: [pause,ready],
+           conditional_function: function(){
+                if(trial_counter % 3 == 0 && trial_counter !=0){
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+       };
+       
+       var srdt_procedure = {
+           timeline: [if_pause,fixation, target, probe, test, if_undecisive],
+           timeline_variables: test_stimuli,
+           randomize_order: true,
+           sample: {
+                type: 'without-replacement',
+                size: 4,
+            }
+       };
+       
+    // Practice procedure
+       var practice = {
+           type: 'html-keyboard-response',
+           stimulus: ' ',
+           choices: ['f','j'],
+           trial_duration: 7000,
+           post_trial_gap: 500,
+           data: {
+                trial_id: function() {return practice_counter;},
+                trial_part: 'practice',
+                probe: jsPsych.timelineVariable('word'.concat(word_assign.probe)),
+                target: jsPsych.timelineVariable('word'.concat(word_assign.target)),
+                MEN_score: jsPsych.timelineVariable('score'),
+                w2v_cosine: jsPsych.timelineVariable('cosine'),
+                relatedness_level: jsPsych.timelineVariable('relatedness'),
+                frequency_probe: jsPsych.timelineVariable('frequency'.concat(word_assign.probe)),
+                frequency_target: jsPsych.timelineVariable('target'.concat(word_assign.probe)),
+                concreteness_probe: jsPsych.timelineVariable('concreteness'.concat(word_assign.probe)),
+                concreteness_target: jsPsych.timelineVariable('concreteness'.concat(word_assign.target)),
+                length_probe: jsPsych.timelineVariable('length'.concat(word_assign.probe)),
+                length_target: jsPsych.timelineVariable('length'.concat(word_assign.target)),
+                key_related: response_assign.related
+            },
+           on_finish: function(){
+               practice_counter++
+               console.log(response_assign.related)
+           }
+       };
+
+       var feedback = {
+            type: 'html-keyboard-response',
+            stimulus: function(){
+                var response_latesttrial = jsPsych.data.get().last(1).values()[0].response;
+                var score_latesttrial = jsPsych.data.get().last(1).values()[0].MEN_score;
+                correct = false;
+                console.log(correct)
+                
+                if (score_latesttrial >= 25 && response_latesttrial == response_assign.related){correct = true}
+                else if (score_latesttrial < 25 && response_latesttrial == response_assign.unrelated){correct = true}
+
+                if (response_latesttrial == null){return 'No response given'} 
+                else if (correct == true && response_latesttrial == response_assign.related){return 'Correct. Most people agree that the words ' + jsPsych.data.get().last(1).values()[0].target + ' and ' + jsPsych.data.get().last(1).values()[0].probe + ' are related. Please continue with "space".'}
+                else if (correct == true && response_latesttrial == response_assign.unrelated){return 'Correct. Most people agree that the words ' + jsPsych.data.get().last(1).values()[0].target + ' and ' + jsPsych.data.get().last(1).values()[0].probe + ' are not related. Please continue with "space".'}
+                else if (correct == false&& response_latesttrial == response_assign.related){return 'Rather wrong. Most people agree that the words ' + jsPsych.data.get().last(1).values()[0].target + ' and ' + jsPsych.data.get().last(1).values()[0].probe + ' are not related. Please continue with "space".'}
+                else if (correct == false&& response_latesttrial == response_assign.unrelated){return 'Rather wrong. Most people agree that the words ' + jsPsych.data.get().last(1).values()[0].target + ' and ' + jsPsych.data.get().last(1).values()[0].probe + ' are related. Please continue with "space".'}
+            },
+            post_trial_gap: 500,
+            choices:[' ']
+
+       };
+
+       var srdt_practice_procedure = {
+           timeline: [fixation, target, probe, practice, feedback],
+           timeline_variables: practice_stimuli,
+           randomize_order: true,
+           sample: {
+                type: 'without-replacement',
+                size: 2,
+            }
+       };
+
+    // Generate timeline
+       var timeline = [];
+       timeline.push(prolificID);
+       timeline.push(consent);
+       timeline.push(instructions);
+       timeline.push(demographics);
+       timeline.push(srdt_practice_procedure);
+       
+       timeline.push(srdt_procedure);
+    
+    // Initialization
+       jsPsych.init({
+           timeline: timeline,
+           on_finish: function() {
+               jsPsych.data.displayData();
+            }
+        })
+
+   </script>
+</html>
