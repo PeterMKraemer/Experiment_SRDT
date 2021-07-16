@@ -55,13 +55,6 @@
 	choices: ['Y'],
     };
     
-    // Instructions
-       var instructions = {
-           type: 'instructions',
-           pages: ['Welcome','Please press <strong> '+ response_assign.related.toString() + ' when related </strong> and <strong> ' + response_assign.unrelated.toString() + ' when unrelated </strong>. '],
-           show_clickable_nav: true
-       };
-
     // Demographics
     var age = [];
     age.push('Prefer not to answer')
@@ -396,6 +389,21 @@
     
 
     // SRDT procedure
+        var instructions = {
+           type: 'instructions',
+           pages: ["<p> The experiment will begin now.</p><p align=left>In this experiment, you will see two words (e.g., <em> cat </em> and <em> dog </em>) presented one after the other."+
+            " If you think the words are <strong>related</strong> in their meaning, please press <strong>" + response_assign.related.toString() + 
+            "</strong>  after the words disappeared. If, however, you think the words are <strong>not related</strong>, please press <strong>" + response_assign.unrelated.toString() + "</strong>.</p>"+
+            "<p align=left>We will record which button you pressed and how long it took you to make your decision. Please decide <strong>as fast and accurately</strong> as possible.</p>"+
+            " <p align=left> Please use your left index finger to press <strong>f</strong> and your right index finger to press <strong>j</strong>.",
+            "<p align=left> You will start with a couple of <strong>practice trials</strong> to get used to the task.</p>"+
+            "<p align=left>During these practice trials, you will receive <strong> feedback</strong> about your decisions."+
+                " In general, there are no right or wrong answers because people can have different views on whether two words are related or not. "+
+                "Nevertheless, the feedback will show you, how most people would judge a word pair.</p>"
+        ],
+           show_clickable_nav: true
+       };
+
 
        // shuffle function from https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
        function shuffle(array) {
@@ -460,7 +468,6 @@
                console.log(response_assign.related)
            }
        }
-       
 
        var undecisive ={
             type: 'html-keyboard-response',
@@ -482,7 +489,7 @@
        var pause = {
            type: 'html-keyboard-response',
            data:{trial_part: 'pause'},
-           stimulus: 'Please take a pause',
+           stimulus: 'Please take a short break of 10-15 seconds.',
            choices: jsPsych.NO_KEYS,
            trial_duration: 2000,
            response_ends_trial: false
@@ -491,7 +498,11 @@
        var ready = {
            type: 'html-keyboard-response',
            data:{trial_part: 'ready'},
-           stimulus: 'Are you ready? Please press "space" to continue.',
+           stimulus: "<p>Are you ready?</p>"+
+           "<p align=left>Please place your left index finger on <strong>f</strong> and your right index finger on <strong>j</strong>. Your thumbs may rest on SPACE."+
+           "<p align=left>Please remember to press <strong>"+response_assign.related.toString() +"</strong> to indicate that two words are <strong>related</strong> and <strong>"+response_assign.unrelated.toString() +"</strong> to indicate that they are <strong>not related</strong></p>"+
+           "<p align=left>Please remember to respond as <strong>fast and accurately</strong> as possible.</p>"+
+           "<p align=left>Please continue with SPACE.</p>",
            choices: [' ']};
 
        if_pause = {
@@ -556,12 +567,12 @@
                 else if (score_latesttrial < 25 && response_latesttrial == response_assign.unrelated){correct = true}
 
                 if (response_latesttrial == null){return 'No response given'} 
-                else if (correct == true && response_latesttrial == response_assign.related){return 'Correct. Most people agree that the words ' + jsPsych.data.get().last(1).values()[0].target + ' and ' + jsPsych.data.get().last(1).values()[0].probe + ' are related. Please continue with "space".'}
-                else if (correct == true && response_latesttrial == response_assign.unrelated){return 'Correct. Most people agree that the words ' + jsPsych.data.get().last(1).values()[0].target + ' and ' + jsPsych.data.get().last(1).values()[0].probe + ' are not related. Please continue with "space".'}
-                else if (correct == false&& response_latesttrial == response_assign.related){return 'Rather wrong. Most people agree that the words ' + jsPsych.data.get().last(1).values()[0].target + ' and ' + jsPsych.data.get().last(1).values()[0].probe + ' are not related. Please continue with "space".'}
-                else if (correct == false&& response_latesttrial == response_assign.unrelated){return 'Rather wrong. Most people agree that the words ' + jsPsych.data.get().last(1).values()[0].target + ' and ' + jsPsych.data.get().last(1).values()[0].probe + ' are related. Please continue with "space".'}
+                else if (correct == true && response_latesttrial == response_assign.related){return "<p style='font-size:30px;color:green;'> <strong>Correct!</strong></p> <p align='left'> By pressing <strong>" + response_assign.related + "</strong>, you judged that <em>" + jsPsych.data.get().last(1).values()[0].target + "</em> and <em>" + jsPsych.data.get().last(1).values()[0].probe + "</em>  are <strong>related</strong>. Most people would agree with you.</p> <p>Please continue with SPACE.</p>"}
+                else if (correct == true && response_latesttrial == response_assign.unrelated){return "<p style='font-size:30px;color:green;'> <strong>Correct!</strong></p> <p align='left'> By pressing <strong>" + response_assign.unrelated + "</strong>, you judged that <em>" + jsPsych.data.get().last(1).values()[0].target + "</em> and <em>" + jsPsych.data.get().last(1).values()[0].probe + "</em>  are <strong>not related</strong>. Most people would agree with you.</p> <p>Please continue with SPACE.</p>"}
+                else if (correct == false&& response_latesttrial == response_assign.related){return "<p style='font-size:30px;color:red;'> <strong>Rather not correct!</strong></p> <p align='left'> By pressing <strong>" + response_assign.related + "</strong>, you judged that <em>" + jsPsych.data.get().last(1).values()[0].target + "</em> and <em>" + jsPsych.data.get().last(1).values()[0].probe + "</em>  are <strong>related</strong>. However, most people would disagree with you, judging them as not related.</p> <p>Please continue with SPACE.</p>"}
+                else if (correct == false&& response_latesttrial == response_assign.unrelated){return "<p style='font-size:30px;color:red;'> <strong>Rather not correct!</strong></p> <p align='left'> By pressing <strong>" + response_assign.unrelated + "</strong>, you judged that <em>" + jsPsych.data.get().last(1).values()[0].target + "</em> and <em>" + jsPsych.data.get().last(1).values()[0].probe + "</em>  are <strong>not related</strong>. However, most people would disagree with you, judging them as related.</p> <p>Please continue with SPACE.</p>"}
             },
-            post_trial_gap: 500,
+            post_trial_gap: 1000,
             choices:[' ']
 
        };
@@ -576,13 +587,27 @@
             }
        };
 
+       var srdt_start = {
+           type: 'html-keyboard-response',
+           data:{trial_part: 'pause'},
+           stimulus: "<p align=left> The actual experiment will begin now.</p>"+
+           "<p align=left>From now on, you will not receive feedback about your responses anymore.</p>"+
+           "<p align=left>Please place your left index finger on <strong>f</strong> and your right index finger on <strong>j</strong>. Your thumbs may rest on SPACE."+
+           "<p align=left>Please remember to press <strong>"+response_assign.related.toString() +"</strong> to indicate that two words are <strong>related</strong> and <strong>"+response_assign.unrelated.toString() +"</strong> to indicate that they are <strong>not related</strong></p>"+
+           "<p align=left>Please remember to respond as <strong>fast and accurately</strong> as possible.</p>"+
+           "<p align=left>Please continue with SPACE.</p>",
+           choices: [' '],
+       };
+
     // Generate timeline
        var timeline = [];
-       timeline.push(prolificID);
-       timeline.push(consent);
+      // timeline.push(prolificID);
+      // timeline.push(consent);
+      // timeline.push(demographics);
        timeline.push(instructions);
-       timeline.push(demographics);
        timeline.push(srdt_practice_procedure);
+       timeline.push(srdt_start);
+
        
        timeline.push(srdt_procedure);
     
