@@ -60,6 +60,8 @@
     age.push('Prefer not to answer')
     for (var i = 18; i <= 99; i++) {age.push(i);}
 
+    var attention_demo = [];
+    for (var i = 1; i <= 20; i++) {attention_demo.push(i);}
 
     var educ = [];
     educ.push('Prefer not to answer')
@@ -360,6 +362,13 @@
                 required: true
             },
             {
+                prompt: 'Are you paying attention to the task? Please select the number between 13 and 15.',
+                options: attention_demo,
+                placeholder: '--select--',
+                name: 'AttentionDemographics', 
+                required: true
+            },
+            {
                 prompt: 'In which country were you born?',
                 options: countryList,
                 placeholder: '--select--',
@@ -386,7 +395,30 @@
             trial_part: 'demographics'
         }
     };
+    // Failed attention check
+    var failed_attentioncheck = {
+            type: "html-keyboard-response",
+            stimulus: "You have failed an attention check. We hope you will understand that we need our participants to pay close attention to the procedures of the experiment. In concordance with the Prolific guidelines on fair attention checks, we have to exclude you from the study. We hope for your understanding." +
+            "<p> You can close the browser window and exit out of the experiment.",
+            choices: jsPsych.NO_KEYS,
+            };
     
+    if_attentioncheck = {
+           timeline: [failed_attentioncheck],
+           conditional_function: function(){
+                var selected_number = JSON.parse(jsPsych.data.get().last(1).values()[0].responses).AttentionDemographics
+                console.log(selected_number)
+                if (selected_number == 14){
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+       };         
+    
+    var demographics_procedure = {
+    timeline: [demographics,if_attentioncheck],
+    };
 
     // SRDT procedure
         var instructions = {
@@ -597,13 +629,35 @@
            "<p align=left>Please remember to respond as <strong>fast and accurately</strong> as possible.</p>"+
            "<p align=left>Please continue with SPACE.</p>",
            choices: [' '],
+           post_trial_gap: 1000,
        };
+    
+       var srdt_procedure = {
+           timeline: [if_pause,fixation, target, probe, test, if_undecisive],
+           timeline_variables: test_stimuli,
+           randomize_order: true,
+           sample: {
+                type: 'without-replacement',
+                size: 4,
+            }
+       };    
+    // Feedback and end of the experiment
+       var finish = {
+            type: "html-keyboard-response",
+            stimulus: "Thank you for participating! Your responses have been recorded." +
+            "<p> You can close the browser window and exit out of the experiment.",
+            choices: jsPsych.NO_KEYS,
+
+            };
+    
+
+    
 
     // Generate timeline
        var timeline = [];
-      // timeline.push(prolificID);
-      // timeline.push(consent);
-      // timeline.push(demographics);
+       timeline.push(prolificID);
+       timeline.push(consent);
+       timeline.push(demographics_procedure);
        timeline.push(instructions);
        timeline.push(srdt_practice_procedure);
        timeline.push(srdt_start);
