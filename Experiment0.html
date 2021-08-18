@@ -16,20 +16,25 @@
        
     // General settings
        
-       var assign_w = shuffle(['1','2']);
-       var word_assign = {target: assign_w[0], probe: assign_w[1]};
-       var assign_r = shuffle(['f','j']);
-       var response_assign = {related: assign_r[0], unrelated: assign_r[1]};
-       var trial_counter = 1;
-       var practice_counter = 1;
+    var assign_w = shuffle(['1','2']);
+    var word_assign = {target: assign_w[0], probe: assign_w[1]};
+    var assign_r = shuffle(['f','j']);
+    var response_assign = {related: assign_r[0], unrelated: assign_r[1]};
+    var trial_counter = 1;
+    var practice_counter = 1;
 
 
     // Prolific ID
-        var prolificID = {
+    var prolificID = {
             type: 'survey-text',
             questions: [{prompt: "Welcome to the experiment! Please enter your Prolific ID to continue:", rows: 1, columns: 40, value: ""},
                             ]
         };
+    // Participant ID
+    var subject_id = jsPsych.randomization.randomID(15);
+    var current = new Date();
+    start_time = String(current.getUTCFullYear()) + '_' + String(current.getUTCMonth()+1) + '_' +  String(current.getUTCDate()) + '_' +  String(current.getUTCHours()) + '_' +  String(current.getUTCMinutes()) + '_' +  String(current.getUTCSeconds()+ '_') 
+    
 
     // Consent
     var consent = {
@@ -407,7 +412,6 @@
            timeline: [failed_attentioncheck],
            conditional_function: function(){
                 var selected_number = JSON.parse(jsPsych.data.get().last(1).values()[0].responses).AttentionDemographics
-                console.log(selected_number)
                 if (selected_number == 14){
                     return false;
                 } else {
@@ -499,7 +503,6 @@
             },
            on_finish: function(){
                trial_counter++
-               console.log(response_assign.related)
            }
        }
 
@@ -568,6 +571,7 @@
            trial_duration: 7000,
            post_trial_gap: 500,
            data: {
+                subject_id: subject_id,
                 trial_id: function() {return practice_counter;},
                 trial_part: 'practice',
                 probe: jsPsych.timelineVariable('word'.concat(word_assign.probe)),
@@ -585,7 +589,6 @@
             },
            on_finish: function(){
                practice_counter++
-               console.log(response_assign.related)
            }
        };
 
@@ -595,7 +598,6 @@
                 var response_latesttrial = jsPsych.data.get().last(1).values()[0].response;
                 var score_latesttrial = jsPsych.data.get().last(1).values()[0].MEN_score;
                 correct = false;
-                console.log(correct)
                 
                 if (score_latesttrial >= 25 && response_latesttrial == response_assign.related){correct = true}
                 else if (score_latesttrial < 25 && response_latesttrial == response_assign.unrelated){correct = true}
@@ -666,12 +668,21 @@
 
        
        timeline.push(srdt_procedure);
+
+    // Storing data
+    function saveData(name, data){
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'write_data.php'); // 'write_data.php' is the path to the php file described above.
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify({filename: name, filedata: data}));
+        }
     
     // Initialization
        jsPsych.init({
            timeline: timeline,
            on_finish: function() {
-               jsPsych.data.displayData();
+                //jsPsych.data.displayData();
+                saveData(start_time + subject_id, jsPsych.data.get().csv();
             }
         })
 
